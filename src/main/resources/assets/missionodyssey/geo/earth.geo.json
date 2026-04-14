@@ -1,0 +1,54 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.earth",
+				"texture_width": 128,
+				"texture_height": 128,
+				"visible_bounds_width": 5,
+				"visible_bounds_height": 4.5,
+				"visible_bounds_offset": [0, 1.75, 0]
+			},
+			"bones": [
+				{
+					"name": "bb_main",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{
+							"origin": [-24, 0, -24],
+							"size": [48, 48, 47],
+							"uv": {
+								"north": {"uv": [24, 24], "uv_size": [24, 24]},
+								"east": {"uv": [0, 24], "uv_size": [24, 24]},
+								"south": {"uv": [72, 24], "uv_size": [24, 24]},
+								"west": {"uv": [48, 24], "uv_size": [24, 24]},
+								"up": {"uv": [24, 0], "uv_size": [24, 24]},
+								"down": {"uv": [48, 24], "uv_size": [24, -24]}
+							}
+						}
+					]
+				},
+				{
+					"name": "clouds",
+					"parent": "bb_main",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{
+							"origin": [-25, -1, -25],
+							"size": [50, 50, 49],
+							"uv": {
+								"north": {"uv": [24, 72], "uv_size": [24, 24]},
+								"east": {"uv": [0, 72], "uv_size": [24, 24]},
+								"south": {"uv": [72, 72], "uv_size": [24, 24]},
+								"west": {"uv": [48, 72], "uv_size": [24, 24]},
+								"up": {"uv": [24, 48], "uv_size": [24, 24]},
+								"down": {"uv": [48, 72], "uv_size": [24, -24]}
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

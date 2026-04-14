@@ -1,0 +1,141 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"off": {
+			"loop": true,
+			"animation_length": 0.08,
+			"bones": {
+				"wing2": {
+					"rotation": {
+						"vector": [0, 0, -15]
+					}
+				},
+				"wing3": {
+					"rotation": {
+						"vector": [0, 0, 15]
+					}
+				},
+				"jetsfire": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 18]
+						},
+						"0.08": {
+							"vector": [0, 0, 18]
+						}
+					}
+				},
+				"SHIP": {
+					"position": {
+						"0.0": {
+							"vector": [0, -15, 0]
+						},
+						"0.08": {
+							"vector": [0, -15, 0]
+						}
+					}
+				}
+			}
+		},
+		"turn_on": {
+			"animation_length": 1.2,
+			"bones": {
+				"wing2": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, -15]
+						},
+						"1.2": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"wing3": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 15]
+						},
+						"1.2": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"jetsfire": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 14]
+						},
+						"0.32": {
+							"vector": [0, 0, 0]
+						}
+					}
+				},
+				"SHIP": {
+					"position": {
+						"0.0": {
+							"vector": [0, -15, 0]
+						},
+						"1.2": {
+							"vector": [0, 0, 0]
+						}
+					}
+				}
+			}
+		},
+		"turn_off": {
+			"animation_length": 1.2,
+			"bones": {
+				"wing2": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.2": {
+							"vector": [0, 0, -15]
+						}
+					},
+					"position": {
+						"vector": [0, 0, 0]
+					}
+				},
+				"wing3": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.2": {
+							"vector": [0, 0, 15]
+						}
+					},
+					"position": {
+						"vector": [0, 0, 0]
+					}
+				},
+				"jetsfire": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"0.24": {
+							"vector": [0, 0, 14]
+						}
+					}
+				},
+				"SHIP": {
+					"position": {
+						"0.0": {
+							"vector": [0, 0, 0]
+						},
+						"1.2": {
+							"vector": [0, -15, 0]
+						}
+					}
+				}
+			}
+		},
+		"driving": {
+			"loop": true,
+			"animation_length": 0.96
+		}
+	}
+}

@@ -1,0 +1,12 @@
+{
+  "type": "missionodyssey:space",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "missionodyssey:space_void",
+      "features": false,
+      "lakes": false,
+      "layers": []
+    }
+  }
+}

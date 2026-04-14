@@ -1,0 +1,29 @@
+# Gradle
+.gradle/
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# VS Code
+.vscode/
+
+# Minecraft Run Directory (Logs, mundos e configs de teste)
+run/
+**/run/
+*.log
+*.log.gz
+/run/logs/
+/run/saves/
+/run/configs/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Pasta do Claude (se não quiser subir as conversas/histórico)
+.claude/
