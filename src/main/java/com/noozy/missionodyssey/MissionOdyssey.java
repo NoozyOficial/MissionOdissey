@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.noozy.missionodyssey.network.ModNetworking;
 import com.noozy.missionodyssey.registry.ModBlocks;
 import com.noozy.missionodyssey.registry.ModEntities;
+import com.noozy.missionodyssey.registry.ModItemGroups;
 import com.noozy.missionodyssey.registry.ModItems;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -26,9 +27,9 @@ public class MissionOdyssey {
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
         ModEntities.register(modEventBus);
+        ModItemGroups.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(ModItems::addCreative);
         modEventBus.addListener(ModNetworking::register);
 
         NeoForge.EVENT_BUS.register(this);

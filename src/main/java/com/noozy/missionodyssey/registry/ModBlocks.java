@@ -1,6 +1,8 @@
 package com.noozy.missionodyssey.registry;
 
 import com.noozy.missionodyssey.MissionOdyssey;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ColoredFallingBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -12,10 +14,12 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.function.Supplier;
+
 public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MissionOdyssey.MODID);
 
-    public static final DeferredBlock<Block> MARS_STONE = BLOCKS.register("mars_stone",
+    public static final DeferredBlock<Block> MARS_STONE = registerBlock("mars_stone",
             () -> new Block(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.TERRACOTTA_BROWN)
                     .instrument(NoteBlockInstrument.BASEDRUM)
@@ -23,7 +27,7 @@ public class ModBlocks {
                     .strength(1.5F, 6.0F)
                     .sound(SoundType.STONE)));
 
-    public static final DeferredBlock<Block> MARS_SAND = BLOCKS.register("mars_sand",
+    public static final DeferredBlock<Block> MARS_SAND = registerBlock("mars_sand",
             () -> new ColoredFallingBlock(
                     new ColorRGBA(0xFFB45028),
                     BlockBehaviour.Properties.of()
@@ -32,6 +36,16 @@ public class ModBlocks {
                     .strength(0.5F)
                     .sound(SoundType.SAND)
             ));
+
+    private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
+        DeferredBlock<T> toReturn = BLOCKS.register(name, block);
+        registerBlockItem(name, toReturn);
+        return toReturn;
+    }
+
+    private static <T extends Block> void registerBlockItem(String name, DeferredBlock<T> block) {
+        ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
+    }
 
     public static void register(IEventBus eventBus) {
         BLOCKS.register(eventBus);

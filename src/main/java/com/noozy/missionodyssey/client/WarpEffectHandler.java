@@ -1,10 +1,11 @@
 package com.noozy.missionodyssey.client;
 
-import com.mojang.math.Axis;
 import com.noozy.missionodyssey.MissionOdyssey;
 import com.noozy.missionodyssey.entity.SpaceshipEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -14,13 +15,17 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 
 /**
- * Drives the client-side Star-Wars-style hyperspace jump animation.
+ * Drives the client-side warp-jump animation.
  *
  * Timeline (ticks):
- *   0 – 19  : CHARGING    — engine revs, FOV slowly climbs, speed-lines fade in
- *  20 – 29  : STRETCHING  — FOV rockets up, lines at full intensity
+ *   0 – 19  : CHARGING    — engine revs, FOV slowly climbs, speed-line overlay fades in
+ *  20 – 29  : STRETCHING  — FOV rockets up, overlay at full opacity
  *  30 – 37  : FLASH       — max FOV, white screen (server fires teleport here)
- *  38 – 59  : RECOVERY    — FOV drops back, lines and overlay fade out
+ *  38 – 59  : RECOVERY    — FOV drops back, overlay fades out
+ *
+ * The speed-line effect is rendered as a full-screen texture blit of
+ * {@code textures/misc/speed_lines.png}, mirroring the approach Minecraft
+ * uses for the freezing / powder-snow overlay in {@code ScreenEffectRenderer}.
  */
 @EventBusSubscriber(modid = MissionOdyssey.MODID, value = Dist.CLIENT)
 public class WarpEffectHandler {
@@ -190,38 +195,36 @@ public class WarpEffectHandler {
 
     // ── Rendering helpers ────────────────────────────────────────────
 
+    /** Texture location for the speed-line overlay. */
+    private static final ResourceLocation SPEED_LINES_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(MissionOdyssey.MODID, "textures/misc/speed_lines.png");
+
     /**
-     * 48 radial "hyperspace star-streak" lines emanating from the screen centre.
-     * Uses PoseStack rotation so each line draws along the rotated X axis,
-     * giving the classic Star-Wars tunnel-of-light effect.
+     * Renders the warp speed-line overlay by blitting {@code speed_lines.png}
+     * across the full screen, exactly like Minecraft's powder-snow / freezing
+     * overlay in {@code ScreenEffectRenderer}.
+     *
+     * @param gui       current GuiGraphics context
+     * @param w         GUI scaled screen width
+     * @param h         GUI scaled screen height
+     * @param intensity overlay opacity in [0, 1]
      */
     private static void renderSpeedLines(GuiGraphics gui, int w, int h, float intensity) {
-        int cx = w / 2;
-        int cy = h / 2;
-        float maxLen = Math.min(w, h) * 0.52f * intensity;
+        // Quadratic ease so the overlay punches in quickly at higher intensities.
+        float alpha = Mth.clamp(intensity * (0.25f + 0.75f * intensity), 0.0f, 1.0f);
 
-        var pose = gui.pose();
+        // Tint via RenderSystem — identical to how ScreenEffectRenderer handles
+        // the powder-snow / pumpkin overlays in vanilla.
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
 
-        for (int i = 0; i < 48; i++) {
-            float angleDeg = i * (360f / 48f);
+        // Stretch the texture across the full screen (UV 0→w, 0→h).
+        gui.blit(SPEED_LINES_TEXTURE, 0, 0, 0.0f, 0.0f, w, h, w, h);
 
-            // Deterministic per-line variation (no Random object allocation per frame)
-            float lenFactor = 0.4f + 0.6f * ((i * 13 + 7) % 11 / 11f);
-            float lineLen   = maxLen * lenFactor;
-            float inner     = 8 + (i * 5 % 14);
-            if (lineLen < 3) continue;
-
-            float lineAlpha = intensity * (0.25f + 0.75f * intensity);
-            int a     = (int) (lineAlpha * 220);
-            int color = (a << 24) | 0x00FFFFFF;
-
-            pose.pushPose();
-            pose.translate(cx, cy, 50);                       // z=50 → on top of other GUI
-            pose.mulPose(Axis.ZP.rotationDegrees(angleDeg)); // rotate so +X = outward direction
-            // Thin 2-pixel-tall rectangle stretching from inner to inner+len
-            gui.fill((int) inner, -1, (int) (inner + lineLen), 1, color);
-            pose.popPose();
-        }
+        // Always restore colour & blend state after custom rendering.
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.disableBlend();
     }
 
     /**
