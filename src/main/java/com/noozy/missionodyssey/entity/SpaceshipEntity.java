@@ -1,6 +1,9 @@
 package com.noozy.missionodyssey.entity;
 
+import com.noozy.missionodyssey.network.WarpSyncPayload;
 import com.noozy.missionodyssey.registry.ModEntities;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,6 +18,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -32,6 +36,18 @@ public class SpaceshipEntity extends Entity implements GeoEntity {
             SynchedEntityData.defineId(SpaceshipEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> THROTTLE_AMOUNT =
             SynchedEntityData.defineId(SpaceshipEntity.class, EntityDataSerializers.FLOAT);
+
+    // ── Temporal Jump ────────────────────────────────────────────────────────
+    /** After receiving the jump packet the server waits this many ticks before
+     *  firing, so the teleport coincides with the client's white-flash phase. */
+    public  static final int  JUMP_FIRE_DELAY    = 30;   // ticks (~1.5 s)
+    public  static final int  JUMP_COOLDOWN_MAX  = 600;  // 30 s
+    public  static final double JUMP_DISTANCE    = 10_000.0;
+
+    /** Server-side countdown until the jump fires (0 = no pending jump). */
+    private int jumpFireTicks = 0;
+    /** Server-side cooldown remaining (0 = ready). */
+    private int jumpCooldownTicks = 0;
 
     public boolean inputForward;
     public boolean inputBackward;
@@ -91,6 +107,22 @@ public class SpaceshipEntity extends Entity implements GeoEntity {
         builder.define(THROTTLE_AMOUNT, 0.0f);
     }
 
+    // ── Temporal Jump API ────────────────────────────────────────────────────
+
+    public boolean isJumpReady() {
+        return jumpCooldownTicks <= 0 && jumpFireTicks <= 0;
+    }
+
+    /**
+     * Called from the network handler when the client requests a jump.
+     * Queues the jump; it fires {@link #JUMP_FIRE_DELAY} ticks later so
+     * the server-side teleport coincides with the client's white-flash phase.
+     */
+    public void requestTemporalJump() {
+        if (!isJumpReady()) return;
+        jumpFireTicks = JUMP_FIRE_DELAY;
+    }
+
     public boolean isEngineOn() {
         return entityData.get(ENGINE_ON);
     }
@@ -120,6 +152,18 @@ public class SpaceshipEntity extends Entity implements GeoEntity {
         yRotO = savedYRot;
         xRotO = savedXRot;
 
+        // ── Temporal jump countdown (server only) ───────────────────────────────
+        if (!level().isClientSide()) {
+            if (jumpCooldownTicks > 0) jumpCooldownTicks--;
+
+            if (jumpFireTicks > 0) {
+                jumpFireTicks--;
+                if (jumpFireTicks == 0) {
+                    performTemporalJump();
+                }
+            }
+        }
+
         Entity passenger = getControllingPassenger();
 
         if (passenger != null) {
@@ -147,6 +191,38 @@ public class SpaceshipEntity extends Entity implements GeoEntity {
         } else {
             super.lerpTo(x, y, z, yaw, pitch, interpolationSteps);
         }
+    }
+
+    /**
+     * Teleports the ship (and its passenger) 10 000 blocks in the direction
+     * the controlling player is looking, then starts the cooldown.
+     */
+    private void performTemporalJump() {
+        LivingEntity driver = getControllingPassenger();
+        if (!(driver instanceof ServerPlayer serverPlayer)) return;
+
+        Vec3 look = driver.getLookAngle().normalize();
+        double newX = getX() + look.x * JUMP_DISTANCE;
+        double newY = getY() + look.y * JUMP_DISTANCE;
+        double newZ = getZ() + look.z * JUMP_DISTANCE;
+
+        newY = Mth.clamp(newY,
+                level().getMinBuildHeight() + 5.0,
+                level().getMaxBuildHeight() - 5.0);
+
+        serverPlayer.stopRiding();
+
+        this.teleportTo(newX, newY, newZ);
+
+        serverPlayer.teleportTo((ServerLevel) this.level(), newX, newY, newZ, serverPlayer.getYRot(), serverPlayer.getXRot());
+
+        serverPlayer.startRiding(this, true);
+
+        setDeltaMovement(Vec3.ZERO);
+
+        jumpCooldownTicks = JUMP_COOLDOWN_MAX;
+        PacketDistributor.sendToPlayer(serverPlayer,
+                new WarpSyncPayload(JUMP_COOLDOWN_MAX));
     }
 
     private void tickFlying() {
@@ -348,9 +424,11 @@ public class SpaceshipEntity extends Entity implements GeoEntity {
 
     @Override
     protected void readAdditionalSaveData(CompoundTag nbt) {
+        jumpCooldownTicks = nbt.getInt("JumpCooldown");
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag nbt) {
+        nbt.putInt("JumpCooldown", jumpCooldownTicks);
     }
 }

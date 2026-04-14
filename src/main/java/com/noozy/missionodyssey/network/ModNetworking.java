@@ -1,7 +1,10 @@
 package com.noozy.missionodyssey.network;
 
+import com.noozy.missionodyssey.client.WarpEffectHandler;
 import com.noozy.missionodyssey.entity.SpaceshipEntity;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
@@ -35,5 +38,33 @@ public class ModNetworking {
                     });
                 }
         );
+
+        // ── Temporal Jump: client → server ───────────────────────────────────
+        registrar.playToServer(
+                TemporalJumpPayload.TYPE,
+                TemporalJumpPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer player
+                            && player.getVehicle() instanceof SpaceshipEntity ship) {
+                        ship.requestTemporalJump();
+                    }
+                })
+        );
+
+        // ── Warp cooldown sync: server → client ──────────────────────────────
+        registrar.playToClient(
+                WarpSyncPayload.TYPE,
+                WarpSyncPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (FMLEnvironment.dist == Dist.CLIENT) {
+                        handleWarpSyncClient(payload.cooldownTicks());
+                    }
+                })
+        );
+    }
+
+    // Isolated in a helper so the server classloader never touches WarpEffectHandler
+    private static void handleWarpSyncClient(int ticks) {
+        WarpEffectHandler.setCooldown(ticks);
     }
 }

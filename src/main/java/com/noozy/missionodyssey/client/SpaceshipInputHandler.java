@@ -4,6 +4,7 @@ import com.noozy.missionodyssey.MissionOdyssey;
 import com.noozy.missionodyssey.entity.SpaceshipEntity;
 import com.noozy.missionodyssey.network.ModNetworking;
 import com.noozy.missionodyssey.network.ShipInputPayload;
+import com.noozy.missionodyssey.network.TemporalJumpPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.neoforged.api.distmarker.Dist;
@@ -53,6 +54,14 @@ public class SpaceshipInputHandler {
         if (currentMask != lastSentMask) {
             PacketDistributor.sendToServer(new ShipInputPayload(currentMask));
             lastSentMask = currentMask;
+        }
+
+        // ── Temporal jump key (fires once per press via consumeClick) ────────
+        if (ModKeybindings.TEMPORAL_JUMP.consumeClick()) {
+            if (ship.isJumpReady() && !WarpEffectHandler.isActive()) {
+                PacketDistributor.sendToServer(new TemporalJumpPayload());
+                WarpEffectHandler.startWarp();
+            }
         }
     }
 }

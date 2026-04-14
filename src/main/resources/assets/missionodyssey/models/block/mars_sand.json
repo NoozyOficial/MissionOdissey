@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "missaoodisseia:block/mars_sand"
+    "all": "missionodyssey:block/mars_sand"
   }
 }

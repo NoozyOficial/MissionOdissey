@@ -1,5 +1,7 @@
 {
   "itemGroup.missionodyssey": "Mission Odyssey",
   "block.missionodyssey.mars_sand": "Mars Sand",
-  "block.missionodyssey.mars_stone": "Mars Stone"
+  "block.missionodyssey.mars_stone": "Mars Stone",
+  "key.categories.missionodyssey": "Mission Odyssey",
+  "key.missionodyssey.temporal_jump": "Temporal Jump"
 }
