@@ -3,6 +3,7 @@ package com.noozy.missionodyssey.client.planet;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.noozy.missionodyssey.MissionOdyssey;
 import com.noozy.missionodyssey.registry.ModDimensions;
+import com.noozy.missionodyssey.util.OrbitalMathHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -68,7 +69,7 @@ public class SaturnWorldRenderer {
         float partialTick = event.getPartialTick().getGameTimeDeltaTicks();
         float time = world.getGameTime() + partialTick;
 
-        Vec3 saturnWorld = new Vec3(ModDimensions.SATURN_X, ModDimensions.SATURN_Y, ModDimensions.SATURN_Z);
+        Vec3 saturnWorld = OrbitalMathHelper.getSaturnPosition(time);
         Vec3 toSaturn = saturnWorld.subtract(cameraPos);
         double actualDist = toSaturn.length();
         if (actualDist < 0.1) return;
@@ -87,11 +88,8 @@ public class SaturnWorldRenderer {
         int packedLight = 0xF000F0;
         int maxLight    = 0xF000F0;
 
-        Vector3f sunWorldDir = new Vector3f(
-                (float) -ModDimensions.SATURN_X,
-                (float) (64.0 - ModDimensions.SATURN_Y),
-                (float) -ModDimensions.SATURN_Z
-        ).normalize();
+        // Direção do Sol calculada dinamicamente a partir da posição orbital atual
+        Vector3f sunWorldDir = OrbitalMathHelper.getSunDirection(saturnWorld);
 
         Vector3f sunDirView = new Vector3f(sunWorldDir);
         RenderSystem.getModelViewMatrix().transformDirection(sunDirView);

@@ -2,6 +2,7 @@ package com.noozy.missionodyssey.client.planet;
 
 import com.noozy.missionodyssey.MissionOdyssey;
 import com.noozy.missionodyssey.registry.ModDimensions;
+import com.noozy.missionodyssey.util.OrbitalMathHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.LightTexture;
 import net.neoforged.api.distmarker.Dist;
@@ -43,7 +44,7 @@ public class MarsWorldRenderer {
         float partialTick = event.getPartialTick().getGameTimeDeltaTicks();
         float time = world.getGameTime() + partialTick;
 
-        Vec3 marsWorld = new Vec3(ModDimensions.MARS_X, ModDimensions.MARS_Y, ModDimensions.MARS_Z);
+        Vec3 marsWorld = OrbitalMathHelper.getMarsPosition(time);
         Vec3 toMars = marsWorld.subtract(cameraPos);
         double actualDist = toMars.length();
 
@@ -65,11 +66,8 @@ public class MarsWorldRenderer {
         // Full bright — shading direcional vem do shader de atmosfera GL puro
         int ambientLight = 0xF000F0;
 
-        Vector3f sunWorldDir = new Vector3f(
-                (float) -ModDimensions.MARS_X,
-                (float) (64.0 - ModDimensions.MARS_Y),
-                (float) -ModDimensions.MARS_Z
-        ).normalize();
+        // Direção do Sol calculada dinamicamente a partir da posição orbital atual
+        Vector3f sunWorldDir = OrbitalMathHelper.getSunDirection(marsWorld);
         
         Vector3f sunDirView = new Vector3f(sunWorldDir);
         RenderSystem.getModelViewMatrix().transformDirection(sunDirView);

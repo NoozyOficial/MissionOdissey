@@ -2,11 +2,11 @@ package com.noozy.missionodyssey.client.planet;
 
 import com.noozy.missionodyssey.MissionOdyssey;
 import com.noozy.missionodyssey.registry.ModDimensions;
+import com.noozy.missionodyssey.util.OrbitalMathHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Camera;
@@ -42,7 +42,7 @@ public class EarthWorldRenderer {
         float partialTick = event.getPartialTick().getGameTimeDeltaTicks();
         float time = world.getGameTime() + partialTick;
 
-        Vec3 earthWorld = new Vec3(ModDimensions.EARTH_X, ModDimensions.EARTH_Y, ModDimensions.EARTH_Z);
+        Vec3 earthWorld = OrbitalMathHelper.getEarthPosition(time);
         Vec3 toEarth = earthWorld.subtract(cameraPos);
         double actualDist = toEarth.length();
 
@@ -64,12 +64,8 @@ public class EarthWorldRenderer {
         // Full bright — shading direcional vem do shader de atmosfera GL puro
         int ambientLight = 0xF000F0;
 
-        // O sol vem da mesma direção que em todos os planetas para coerência
-        Vector3f sunWorldDir = new Vector3f(
-                (float) -ModDimensions.SATURN_X,
-                (float) (64.0 - ModDimensions.SATURN_Y),
-                (float) -ModDimensions.SATURN_Z
-        ).normalize();
+        // Direção do Sol calculada dinamicamente a partir da posição orbital atual
+        Vector3f sunWorldDir = OrbitalMathHelper.getSunDirection(earthWorld);
         
         Vector3f sunDirView = new Vector3f(sunWorldDir);
         RenderSystem.getModelViewMatrix().transformDirection(sunDirView);

@@ -2,6 +2,7 @@ package com.noozy.missionodyssey.server;
 
 import com.noozy.missionodyssey.MissionOdyssey;
 import com.noozy.missionodyssey.registry.ModDimensions;
+import com.noozy.missionodyssey.util.OrbitalMathHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,17 +34,21 @@ public class TeleportHandler {
 
         if (!isSpace && !isMars && !isOverworld) return;
 
+        // Calcula posições orbitais atuais usando o gameTime do mundo
+        long gameTime = world.getGameTime();
+
         for (ServerPlayer player : new ArrayList<>(world.players())) {
             if (isOverworld) {
                 if (player.getY() > 320.0) {
                     ServerLevel spaceWorld = world.getServer().getLevel(ModDimensions.SPACE_KEY);
                     if (spaceWorld != null) {
+                        Vec3 earthPos = OrbitalMathHelper.getEarthPosition(gameTime);
                         teleportWithShip(player, spaceWorld,
-                                ModDimensions.EARTH_X - 450.0, ModDimensions.EARTH_Y, ModDimensions.EARTH_Z);
+                                earthPos.x - 450.0, earthPos.y, earthPos.z);
                     }
                 }
             } else if (isSpace) {
-                Vec3 marsCenter = new Vec3(ModDimensions.MARS_X, ModDimensions.MARS_Y, ModDimensions.MARS_Z);
+                Vec3 marsCenter = OrbitalMathHelper.getMarsPosition(gameTime);
                 double distMars = player.position().distanceTo(marsCenter);
 
                 if (distMars < ModDimensions.MARS_RADIUS_BLOCKS + 10.0) {
@@ -53,7 +58,7 @@ public class TeleportHandler {
                     }
                 }
 
-                Vec3 earthCenter = new Vec3(ModDimensions.EARTH_X, ModDimensions.EARTH_Y, ModDimensions.EARTH_Z);
+                Vec3 earthCenter = OrbitalMathHelper.getEarthPosition(gameTime);
                 double distEarth = player.position().distanceTo(earthCenter);
 
                 if (distEarth < ModDimensions.EARTH_RADIUS_BLOCKS + 15.0) {
@@ -69,9 +74,10 @@ public class TeleportHandler {
                     ServerLevel spaceWorld = world.getServer().getLevel(ModDimensions.SPACE_KEY);
                     if (spaceWorld != null) {
                         removeMarsGravity(player);
+                        Vec3 marsPos = OrbitalMathHelper.getMarsPosition(gameTime);
                         teleportWithShip(player, spaceWorld,
-                                ModDimensions.MARS_X - ModDimensions.MARS_RADIUS_BLOCKS - 150.0,
-                                ModDimensions.MARS_Y, ModDimensions.MARS_Z);
+                                marsPos.x - ModDimensions.MARS_RADIUS_BLOCKS - 150.0,
+                                marsPos.y, marsPos.z);
                     }
                 }
             }
