@@ -30,7 +30,7 @@ public class MarsGeoRenderer extends GeoObjectRenderer<MarsGeoObject> {
                           boolean isReRender, float partialTick, int packedLight, int packedOverlay,
                           int packedColor) {
         this.objectRenderTranslations = new Matrix4f(poseStack.last().pose());
-        // Centralizar o modelo: cubo de 3 blocos de altura, pivot no centro em Y
+
         poseStack.translate(0.0, -1.5, 0.0);
     }
 

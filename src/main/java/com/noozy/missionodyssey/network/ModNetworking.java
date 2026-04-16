@@ -2,7 +2,10 @@ package com.noozy.missionodyssey.network;
 
 import com.noozy.missionodyssey.client.WarpEffectHandler;
 import com.noozy.missionodyssey.entity.SpaceshipEntity;
+import com.noozy.missionodyssey.block.entity.TitaniumBlastFurnaceBlockEntity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -39,7 +42,7 @@ public class ModNetworking {
                 }
         );
 
-        // ── Temporal Jump: client → server ───────────────────────────────────
+
         registrar.playToServer(
                 TemporalJumpPayload.TYPE,
                 TemporalJumpPayload.STREAM_CODEC,
@@ -51,7 +54,7 @@ public class ModNetworking {
                 })
         );
 
-        // ── Warp cooldown sync: server → client ──────────────────────────────
+
         registrar.playToClient(
                 WarpSyncPayload.TYPE,
                 WarpSyncPayload.STREAM_CODEC,
@@ -61,9 +64,29 @@ public class ModNetworking {
                     }
                 })
         );
+
+
+        registrar.playToClient(
+                TitaniumBlastFurnaceStatePayload.TYPE,
+                TitaniumBlastFurnaceStatePayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (FMLEnvironment.dist == Dist.CLIENT) {
+                        handleBlastFurnaceStateClient(payload);
+                    }
+                })
+        );
     }
 
-    // Isolated in a helper so the server classloader never touches WarpEffectHandler
+    private static void handleBlastFurnaceStateClient(TitaniumBlastFurnaceStatePayload payload) {
+        if (Minecraft.getInstance().level != null) {
+            BlockEntity be = Minecraft.getInstance().level.getBlockEntity(payload.pos());
+            if (be instanceof TitaniumBlastFurnaceBlockEntity furnace) {
+                furnace.clientSetState(payload.state(), payload.serverTime());
+            }
+        }
+    }
+
+
     private static void handleWarpSyncClient(int ticks) {
         WarpEffectHandler.setCooldown(ticks);
     }

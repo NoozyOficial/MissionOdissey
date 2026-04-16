@@ -23,6 +23,6 @@ public class SaturnGeoModel extends GeoModel<SaturnGeoObject> {
 
     @Override
     public ResourceLocation getAnimationResource(SaturnGeoObject obj) {
-        return null; // Sem animações GeckoLib — rotação aplicada no renderer
+        return null;
     }
 }

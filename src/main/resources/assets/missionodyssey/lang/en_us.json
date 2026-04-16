@@ -2,7 +2,15 @@
   "itemGroup.missionodyssey": "Mission Odyssey",
   "block.missionodyssey.mars_sand": "Mars Sand",
   "block.missionodyssey.mars_stone": "Mars Stone",
+  "block.missionodyssey.machine_frame": "Machine Frame",
+  "block.missionodyssey.titanium_blast_furnace": "Titanium Blast Furnace",
   "item.missionodyssey.spaceship": "Spaceship",
   "key.categories.missionodyssey": "Mission Odyssey",
-  "key.missionodyssey.temporal_jump": "Temporal Jump"
+  "key.missionodyssey.temporal_jump": "Temporal Jump",
+  "block.missionodyssey.titanium_ore": "Titanium Ore",
+  "block.missionodyssey.deepslate_titanium_ore": "Deepslate Titanium Ore",
+  "block.missionodyssey.raw_titanium_block": "Raw Titanium Block",
+  "block.missionodyssey.titanium_block": "Titanium Block",
+  "item.missionodyssey.raw_titanium": "Raw Titanium",
+  "item.missionodyssey.titanium_ingot": "Titanium Ingot"
 }

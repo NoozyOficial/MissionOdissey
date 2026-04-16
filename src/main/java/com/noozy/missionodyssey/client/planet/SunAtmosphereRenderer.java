@@ -12,25 +12,11 @@ import org.lwjgl.system.MemoryStack;
 
 import java.nio.FloatBuffer;
 
-/**
- * Atmosfera do Sol — Corona Solar.
- *
- * Diferente dos outros planetas, o Sol:
- *  - É SUA PRÓPRIA fonte de luz, então não há "sunDir" externo.
- *  - A corona emite luz em todas as direções (isotrópica).
- *  - Camadas: cromosfera interna (amarelo/laranja quente),
- *             corona externa (branco-azulado com fade), e
- *             um halo aditivo brilhante.
- *
- * O shader usa APENAS o ângulo do normal em relação ao observador (rim lighting
- * puro), produzindo o halo característico da corona solar real.
- *
- * O uTime é passado para animar a "pulsação" da corona.
- */
+
 public class SunAtmosphereRenderer {
 
-    // A corona solar se estende muito além da fotosfera (~1–2× o raio)
-    // Usamos 1.35 para um halo vistoso mas contido.
+
+
     private static final float CORONA_RADIUS = (float) (ModDimensions.SUN_MODEL_RADIUS * 1.45);
     private static final int   CUBE_VERT_COUNT = 36;
 
@@ -41,9 +27,9 @@ public class SunAtmosphereRenderer {
     private static int uProjLoc;
     private static int uTimeLoc;
 
-    // ---------------------------------------------------------
-    //  Vertex Shader
-    // ---------------------------------------------------------
+
+
+
     private static final String VERT_SRC =
             "#version 150 core\n" +
             "in vec3 Position;\n" +
@@ -58,24 +44,24 @@ public class SunAtmosphereRenderer {
             "    vViewPos = vp.xyz;\n" +
             "}\n";
 
-    // ---------------------------------------------------------
-    //  Fragment Shader — Corona Solar
-    //
-    //  A atmosfera do Sol real tem:
-    //   • Fotosfera: amarelo-branco (~5778 K)
-    //   • Cromosfera: vermelho-rosacea (Ha line)
-    //   • Corona: branco-azulado extremamente tênue mas muito quente
-    //
-    //  Aqui renderizamos o halo aditivo que vai POR CIMA do modelo GeckoLib,
-    //  exibindo: borda laranja-dourada interna → branco quente → fade para
-    //  corona azulada → transparência no espaço.
-    //
-    //  A pulsação solar (uTime) é adicionada como variação de opacidade
-    //  para imitar a natureza dinâmica do campo magnético solar.
-    // ---------------------------------------------------------
-    // ---------------------------------------------------------
-    //  Fragment Shader — Corona Solar (Ajustado para tons quentes)
-    // ---------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     private static final String FRAG_SRC =
             "#version 150 core\n" +
                     "in vec3 vNormalView;\n" +
@@ -126,7 +112,7 @@ public class SunAtmosphereRenderer {
                     "    fragColor = vec4(color, alpha);\n" +
                     "}\n";
 
-    // ---------------------------------------------------------
+
     private static float[] buildCubeVerts(float r) {
         return new float[] {
                 -r,-r, r,  r,-r, r, -r, r, r,  r,-r, r,  r, r, r, -r, r, r,
@@ -182,10 +168,7 @@ public class SunAtmosphereRenderer {
         return id;
     }
 
-    /**
-     * @param matrices PoseStack já posicionada/escalada no centro do Sol.
-     * @param timeTicks Tempo de jogo em ticks para animação da corona.
-     */
+
     public static void render(PoseStack matrices, float timeTicks) {
         initIfNeeded();
 
@@ -200,12 +183,12 @@ public class SunAtmosphereRenderer {
         boolean depthMask    = GL11.glGetBoolean(GL11.GL_DEPTH_WRITEMASK);
         boolean cullEnabled  = GL11.glGetBoolean(GL11.GL_CULL_FACE);
 
-        // Blending ADITIVO: a corona soma brilho na cena (igual a estrelas reais)
+
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         GL11.glDepthMask(false);
-        // Sem culling: renderizar tanto a face interna quanto a externa
-        // da casca para o efeito de halo funcionar em todos os ângulos.
+
+
         GL11.glDisable(GL11.GL_CULL_FACE);
 
         GL20.glUseProgram(shaderProgram);
@@ -219,14 +202,14 @@ public class SunAtmosphereRenderer {
             proj.get(pBuf);
             GL20.glUniformMatrix4fv(uProjLoc, false, pBuf);
 
-            // Normaliza o tempo para segundos-ish
+
             GL20.glUniform1f(uTimeLoc, timeTicks * 0.05f);
         }
 
         GL30.glBindVertexArray(vaoId);
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, CUBE_VERT_COUNT);
 
-        // Restaurar estado anterior
+
         GL20.glUseProgram(prevProgram);
         GL30.glBindVertexArray(prevVao);
         GL11.glDepthMask(depthMask);

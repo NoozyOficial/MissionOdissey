@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "missionodyssey:block/titanium_blast_furnace_side",
+    "front": "missionodyssey:block/titanium_blast_furnace_front",
+    "side": "missionodyssey:block/titanium_blast_furnace_side"
+  }
+}

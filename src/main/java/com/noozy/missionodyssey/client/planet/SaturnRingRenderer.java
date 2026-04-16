@@ -23,8 +23,8 @@ import org.joml.Vector3f;
 
 public class SaturnRingRenderer {
 
-    private static final float MODEL_INNER_R = 1.40f  * (float) ModDimensions.SATURN_MODEL_RADIUS; // ≈ 2.10
-    private static final float MODEL_OUTER_R = 2.375f * (float) ModDimensions.SATURN_MODEL_RADIUS; // ≈ 3.5625
+    private static final float MODEL_INNER_R = 1.40f  * (float) ModDimensions.SATURN_MODEL_RADIUS;
+    private static final float MODEL_OUTER_R = 2.375f * (float) ModDimensions.SATURN_MODEL_RADIUS;
 
     private static final float RING_INNER_REAL = (float) (ModDimensions.SATURN_RADIUS_BLOCKS * 1.25);
     private static final float RING_OUTER_REAL = (float) (ModDimensions.SATURN_RADIUS_BLOCKS * 2.375);
@@ -108,20 +108,20 @@ public class SaturnRingRenderer {
         Vector3f localSunDir = new Vector3f(sunWorldDir);
         localSunDir.rotateZ((float) Math.toRadians(26.73f));
         localSunDir.rotateY(-rotationAngle);
-        
+
         float planetRadius = (float) ModDimensions.SATURN_MODEL_RADIUS;
 
         float eps = 0.003f;
         int GRID = 32;
         float step = (MODEL_OUTER_R * 2) / GRID;
-        
+
         for (int i = 0; i < GRID; i++) {
             for (int j = 0; j < GRID; j++) {
                 float x0 = -MODEL_OUTER_R + i * step;
                 float z0 = -MODEL_OUTER_R + j * step;
                 float x1 = x0 + step;
                 float z1 = z0 + step;
-                
+
                 float u0 = (float) i / GRID;
                 float v0 = (float) j / GRID;
                 float u1 = (float) (i + 1) / GRID;
@@ -250,9 +250,9 @@ public class SaturnRingRenderer {
         }
 
         @Override public VertexConsumer addVertex(float x, float y, float z) { delegate.addVertex(x, y, z); return this; }
-        @Override public VertexConsumer setColor(int r, int g, int b, int a) { 
-            delegate.setColor((int)(r * brightness), (int)(g * brightness), (int)(b * brightness), a); 
-            return this; 
+        @Override public VertexConsumer setColor(int r, int g, int b, int a) {
+            delegate.setColor((int)(r * brightness), (int)(g * brightness), (int)(b * brightness), a);
+            return this;
         }
         @Override public VertexConsumer setUv(float u, float v) { delegate.setUv(u, v); return this; }
         @Override public VertexConsumer setUv1(int u, int v) { delegate.setUv1(u, v); return this; }

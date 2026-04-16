@@ -13,7 +13,7 @@ public class EarthGeoObject implements GeoAnimatable {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // No default controllers, clouds texture uses raw GL
+
     }
 
     @Override

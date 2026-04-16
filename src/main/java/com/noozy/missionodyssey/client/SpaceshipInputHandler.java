@@ -56,7 +56,7 @@ public class SpaceshipInputHandler {
             lastSentMask = currentMask;
         }
 
-        // ── Temporal jump key (fires once per press via consumeClick) ────────
+
         if (ModKeybindings.TEMPORAL_JUMP.consumeClick()) {
             if (ship.isJumpReady() && !WarpEffectHandler.isActive()) {
                 PacketDistributor.sendToServer(new TemporalJumpPayload());

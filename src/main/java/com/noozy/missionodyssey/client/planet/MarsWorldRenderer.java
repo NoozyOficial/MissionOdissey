@@ -50,7 +50,7 @@ public class MarsWorldRenderer {
 
         if (actualDist < 0.1) return;
 
-        // Lógica de Distância visual no Skybox
+
         Vec3 direction = toMars.normalize();
         int viewChunks = Minecraft.getInstance().options.renderDistance().get();
         double maxFakeDist = Math.max(MIN_FAKE_DISTANCE, viewChunks * 16.0 * 1.8);
@@ -60,29 +60,29 @@ public class MarsWorldRenderer {
         double fakeRadius = Math.tan(angularRadius) * fakeDistance;
         double scale = Math.min(fakeRadius / ModDimensions.MARS_MODEL_RADIUS, (fakeDistance - 0.1) / ModDimensions.MARS_MODEL_RADIUS);
 
-        // Rotação Diária (Marte vira parecido com a Terra)
+
         float rotation = (float) ((time % 7500.0) / 7500.0 * 360.0);
-        
-        // Full bright — shading direcional vem do shader de atmosfera GL puro
+
+
         int ambientLight = 0xF000F0;
 
-        // Direção do Sol calculada dinamicamente a partir da posição orbital atual
+
         Vector3f sunWorldDir = OrbitalMathHelper.getSunDirection(marsWorld);
-        
+
         Vector3f sunDirView = new Vector3f(sunWorldDir);
         RenderSystem.getModelViewMatrix().transformDirection(sunDirView);
 
-        // Renderização do Planeta
+
         Vec3 renderPos = direction.scale(fakeDistance);
         matrices.pushPose();
         matrices.mulPose(new Quaternionf(camera.rotation()).conjugate());
         matrices.translate(renderPos.x, renderPos.y, renderPos.z);
 
-        // Inclinação axial de Marte é ~25.19 graus
+
         matrices.mulPose(Axis.ZP.rotationDegrees(-25.19f));
         matrices.scale((float) scale, (float) scale, (float) scale);
 
-        // Rotação diária em torno do próprio eixo Y
+
         matrices.mulPose(Axis.YP.rotationDegrees(rotation));
 
         PLANET_RENDERER.renderPlanet(matrices, consumers, partialTick, ambientLight);

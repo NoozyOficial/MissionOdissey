@@ -15,11 +15,11 @@ import java.nio.FloatBuffer;
 
 public class MarsAtmosphereRenderer {
 
-    // Constante de Raio para atmosfera fina de Marte
+
     private static final float ATMO_RADIUS = (float) (ModDimensions.MARS_MODEL_RADIUS * 1.05);
     private static final int CUBE_VERT_COUNT = 36;
 
-    // Atmosfera GL State
+
     private static int shaderProgram = 0;
     private static int vaoId = 0;
     private static int vboId = 0;
@@ -64,7 +64,7 @@ public class MarsAtmosphereRenderer {
                     "    vec3 color = mix(innerColor, outerColor, pow(rim, 6.0));\n" +
                     "    color = mix(color, backColor, backScat * pow(rim, 2.0) * 0.85);\n" +
                     "    color = mix(color, sunColor, fwdScat * (1.0 - rim) * 0.45);\n" +
-                    "    fragColor = vec4(color, atmo * 0.85);\n" + // opacidade base um pouco menor pois atmosfera e fina
+                    "    fragColor = vec4(color, atmo * 0.85);\n" +
                     "}\n";
 
     private static float[] buildCubeVerts(float r) {

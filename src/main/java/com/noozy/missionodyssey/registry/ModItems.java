@@ -15,6 +15,12 @@ public class ModItems {
     public static final DeferredItem<Item> SPACESHIP_ITEM = ITEMS.register("spaceship",
             () -> new SpaceshipItem(new Item.Properties().stacksTo(1)));
 
+    public static final DeferredItem<Item> RAW_TITANIUM = ITEMS.register("raw_titanium",
+            () -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<Item> TITANIUM_INGOT = ITEMS.register("titanium_ingot",
+            () -> new Item(new Item.Properties()));
+
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }

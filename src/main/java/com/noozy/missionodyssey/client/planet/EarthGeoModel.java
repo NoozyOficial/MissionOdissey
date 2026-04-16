@@ -21,7 +21,7 @@ public class EarthGeoModel extends GeoModel<EarthGeoObject> {
 
     @Override
     public ResourceLocation getAnimationResource(EarthGeoObject animatable) {
-        // No animation file
+
         return ResourceLocation.fromNamespaceAndPath(MissionOdyssey.MODID, "animations/empty.json");
     }
 }

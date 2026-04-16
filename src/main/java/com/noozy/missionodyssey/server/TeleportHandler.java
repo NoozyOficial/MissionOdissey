@@ -34,7 +34,7 @@ public class TeleportHandler {
 
         if (!isSpace && !isMars && !isOverworld) return;
 
-        // Calcula posições orbitais atuais usando o gameTime do mundo
+
         long gameTime = world.getGameTime();
 
         for (ServerPlayer player : new ArrayList<>(world.players())) {
@@ -84,41 +84,28 @@ public class TeleportHandler {
         }
     }
 
-    /**
-     * Teleports a player (and their spaceship vehicle, if any) to {@code destLevel}
-     * at the given coordinates, preserving the ship's velocity and orientation.
-     *
-     * <p>Order of operations:
-     * <ol>
-     *   <li>If the player is riding a vehicle, save its velocity + rotation.</li>
-     *   <li>Dismount the player so the vehicle becomes an independent entity.</li>
-     *   <li>Send the vehicle to the destination via {@link Entity#changeDimension},
-     *       restoring the saved velocity immediately after arrival.</li>
-     *   <li>Teleport the player to the same position.</li>
-     *   <li>Re-mount the player onto the vehicle.</li>
-     * </ol>
-     */
+
     private static void teleportWithShip(ServerPlayer player, ServerLevel destLevel,
                                          double destX, double destY, double destZ) {
         Entity vehicle = player.getVehicle();
 
         if (vehicle == null) {
-            // No ship — plain player teleport.
+
             player.teleportTo(destLevel, destX, destY, destZ, player.getYRot(), player.getXRot());
             return;
         }
 
-        // ── 1. Snapshot ship state before anything changes ───────────────────
+
         Vec3  savedVelocity = vehicle.getDeltaMovement();
         float savedYRot     = vehicle.getYRot();
         float savedXRot     = vehicle.getXRot();
 
-        // ── 2. Dismount so the ship is no longer a passenger container ────────
+
         player.stopRiding();
 
-        // ── 3. Move the ship to the destination dimension + position ──────────
-        //      DimensionTransition carries position, velocity and rotation into
-        //      the new level; this is the correct 1.21.1 cross-dimension API.
+
+
+
         DimensionTransition shipTransition = new DimensionTransition(
                 destLevel,
                 new Vec3(destX, destY, destZ),
@@ -129,10 +116,10 @@ public class TeleportHandler {
         );
         Entity arrivedVehicle = vehicle.changeDimension(shipTransition);
 
-        // ── 4. Teleport the player to the same spot ───────────────────────────
+
         player.teleportTo(destLevel, destX, destY, destZ, savedYRot, savedXRot);
 
-        // ── 5. Re-mount the player on the ship that arrived ───────────────────
+
         if (arrivedVehicle != null && !arrivedVehicle.isRemoved()) {
             player.startRiding(arrivedVehicle, true);
         }

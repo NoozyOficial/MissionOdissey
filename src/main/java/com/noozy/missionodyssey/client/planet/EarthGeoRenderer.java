@@ -30,14 +30,14 @@ public class EarthGeoRenderer extends GeoObjectRenderer<EarthGeoObject> {
                           boolean isReRender, float partialTick, int packedLight, int packedOverlay,
                           int packedColor) {
         this.objectRenderTranslations = new Matrix4f(poseStack.last().pose());
-        // Centralizar
+
         poseStack.translate(0.0, -1.5, 0.0);
     }
 
     @Override
     public void renderRecursively(PoseStack poseStack, EarthGeoObject animatable, GeoBone bone, RenderType renderType, net.minecraft.client.renderer.MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int packedColor) {
-        
-        // Esconde o osso das nuvens do Geckolib para desenharmos no Shader de GL puro depois
+
+
         if (bone.getName().equals("clouds")) {
             return;
         }

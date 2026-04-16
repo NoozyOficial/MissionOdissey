@@ -12,67 +12,48 @@ import org.lwjgl.system.MemoryStack;
 
 import java.nio.FloatBuffer;
 
-/**
- * Renderizador realista de Buraco Negro em OpenGL puro.
- *
- * Três passes:
- *
- *  1. EVENT HORIZON — esfera opaca e absolutamente negra.
- *     Usa um cubo unit-sphere inscrito com depth-write ativo.
- *     O fragment shader descarta fragmentos que estão fora da esfera
- *     (via SDF na esfera unitária), garantindo silhueta circular perfeita.
- *
- *  2. GRAVITATIONAL LENSING HALO — anel de distorção óptica ao redor
- *     do event horizon. O shader simula lensing via banding concêntrico
- *     de alta intensidade. Blending aditivo, sem depth write.
- *
- *  3. ACCRETION DISK — disco de plasma superaquecido em anel.
- *     Gradiente de temperatura: interior branco-azulado (>20 000K) →
- *     amarelo-laranja (8 000K) → vermelho-escuro (2 500K).
- *     Animado com turbulência pseudo-noise em tempo real.
- *     Doppler shift: lado que avança em direção ao observador é mais azul/brilhante.
- */
+
 public class BlackHoleRenderer {
 
-    // Raio do cubo unitário: mesmo padrão dos outros planetas
+
     private static final float R  = (float) ModDimensions.BLACK_HOLE_MODEL_RADIUS;
 
-    // O horizonte ocupa ~65% do cubo (para que o lensing halo tenha espaço)
+
     private static final float HORIZON_R = R * 0.65f;
 
-    // O halo de lensing ocupa R inteiro (cubo)
+
     private static final float LENS_R    = R;
 
-    // Disco de acreção: anel plano (Y=0) de raio interno→externo escalado no world renderer
-    // Os vértices do disco são gerados em UV space [0..1]
+
+
     private static final int   DISK_SEGMENTS = 128;
 
     private static final int CUBE_VERT_COUNT = 36;
 
-    // ── GL state ───────────────────────────────────────────────────────────────
 
-    // Pass 1: Event Horizon
+
+
     private static int horizonProg = 0;
     private static int horizonVao  = 0;
     private static int horizonVbo  = 0;
     private static int hMV, hProj;
 
-    // Pass 2: Lensing Halo
+
     private static int lensProg = 0;
     private static int lensVao  = 0;
     private static int lensVbo  = 0;
     private static int lMV, lProj, lTime;
 
-    // Pass 3: Accretion Disk
+
     private static int diskProg = 0;
     private static int diskVao  = 0;
     private static int diskVbo  = 0;
     private static int dMV, dProj, dTime, dViewRight, dViewUp;
 
-    // ── Shader sources ─────────────────────────────────────────────────────────
 
-    // ---- PASS 1: EVENT HORIZON ----
-    // Vértice simples, projeta o cubo
+
+
+
     private static final String HORIZON_VERT =
         "#version 150 core\n" +
         "in vec3 Position;\n" +
@@ -84,7 +65,7 @@ public class BlackHoleRenderer {
         "    gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);\n" +
         "}\n";
 
-    // Fragmento: SDF esfera — descarta o que está fora, pinta preto absoluto
+
     private static final String HORIZON_FRAG =
         "#version 150 core\n" +
         "in vec3 vLocal;\n" +
@@ -96,7 +77,7 @@ public class BlackHoleRenderer {
         "    fragColor = vec4(0.0, 0.0, 0.0, 1.0);\n" +
         "}\n";
 
-    // ---- PASS 2: GRAVITATIONAL LENSING HALO ----
+
     private static final String LENS_VERT =
         "#version 150 core\n" +
         "in vec3 Position;\n" +
@@ -111,10 +92,10 @@ public class BlackHoleRenderer {
         "    gl_Position = ProjMat * vp;\n" +
         "}\n";
 
-    // O lensing halo simula a distorção de Einstein ring e photon sphere:
-    //  - Anel mais brilhante justo além do event horizon (photon sphere ~1.5× Schwarzschild)
-    //  - Fade rápido para fora
-    //  - Animação pulsante fraca
+
+
+
+
     private static final String LENS_FRAG =
         "#version 150 core\n" +
         "in vec3 vLocal;\n" +
@@ -160,9 +141,9 @@ public class BlackHoleRenderer {
         "    fragColor = vec4(color, intensity);\n" +
         "}\n";
 
-    // ---- PASS 3: ACCRETION DISK ----
-    // Geometria: tristrip anel plano (Y=0) de segmentos, dois vértices por anel (inner/outer)
-    // Atributo: Position(3) + UV(2) onde U=ângulo 0-1, V=0 inner / 1 outer
+
+
+
 
     private static final String DISK_VERT =
         "#version 150 core\n" +
@@ -181,18 +162,18 @@ public class BlackHoleRenderer {
         "    gl_Position = ProjMat * vp;\n" +
         "}\n";
 
-    // Disco de acreção realista:
-    //  Física: plasma em órbita kepleriana aquece por fricção viscosa.
-    //  Interior é o mais quente (azul-branco), exterior mais frio (laranja-vermelho).
-    //  Efeito Doppler: o lado que se move em direção ao observador é blue-shifted (mais azul/brilhante).
-    //  Turbulência: noise temporal em aneis.
+
+
+
+
+
     private static final String DISK_FRAG =
         "#version 150 core\n" +
         "in vec2 vUV;\n" +
         "in vec3 vViewPos;\n" +
         "in vec3 vWorldPos;\n" +
         "uniform float uTime;\n" +
-        "uniform vec3 uViewRight;\n" +   // right vector da câmera em world space
+        "uniform vec3 uViewRight;\n" +
         "uniform vec3 uViewUp;\n" +
         "out vec4 fragColor;\n" +
         "\n" +
@@ -285,9 +266,9 @@ public class BlackHoleRenderer {
         "    fragColor = vec4(diskColor * brightness, brightness * 0.95);\n" +
         "}\n";
 
-    // ── Geometry builders ──────────────────────────────────────────────────────
 
-    /** Cubo unit-sphere inscribed para o event horizon e o lensing */
+
+
     private static float[] buildCubeVerts(float r) {
         return new float[]{
             -r,-r, r,  r,-r, r, -r, r, r,  r,-r, r,  r, r, r, -r, r, r,
@@ -299,20 +280,12 @@ public class BlackHoleRenderer {
         };
     }
 
-    /**
-     * Gera o disco de acreção como um anel de triângulos em XZ.
-     * Cada par de vértices: (inner_vertex, outer_vertex) por segmento.
-     * Atributo: Position(3) + UV(2)
-     * UV.x = ângulo normalizado (0..1), UV.y = 0 (inner) / 1 (outer)
-     *
-     * O disco é plano em Y=0 no espaço local do buraco negro.
-     * O world renderer inclina o disco ~15° para dar perspectiva.
-     */
+
     private static float[] buildDiskVerts(float innerR, float outerR) {
         int n = DISK_SEGMENTS;
-        // n+1 segmentos para fechar o anel, 2 vértices por segmento (inner+outer)
-        // Cada quad = 2 triângulos = 6 vértices
-        float[] v = new float[n * 6 * 5]; // 5 floats por vértice: xyz + uv
+
+
+        float[] v = new float[n * 6 * 5];
         int idx = 0;
         for (int i = 0; i < n; i++) {
             float a0 = (float) i       / n;
@@ -323,17 +296,17 @@ public class BlackHoleRenderer {
             float cx0 = (float) Math.cos(theta0), sz0 = (float) Math.sin(theta0);
             float cx1 = (float) Math.cos(theta1), sz1 = (float) Math.sin(theta1);
 
-            // inner0, inner1, outer0, outer1
+
             float ix0 = cx0 * innerR, iz0 = sz0 * innerR;
             float ix1 = cx1 * innerR, iz1 = sz1 * innerR;
             float ox0 = cx0 * outerR, oz0 = sz0 * outerR;
             float ox1 = cx1 * outerR, oz1 = sz1 * outerR;
 
-            // Triangle 1: inner0, inner1, outer0
+
             idx = vert5(v, idx, ix0, 0, iz0, a0, 0f);
             idx = vert5(v, idx, ix1, 0, iz1, a1, 0f);
             idx = vert5(v, idx, ox0, 0, oz0, a0, 1f);
-            // Triangle 2: inner1, outer1, outer0
+
             idx = vert5(v, idx, ix1, 0, iz1, a1, 0f);
             idx = vert5(v, idx, ox1, 0, oz1, a1, 1f);
             idx = vert5(v, idx, ox0, 0, oz0, a0, 1f);
@@ -346,12 +319,12 @@ public class BlackHoleRenderer {
         return i;
     }
 
-    // ── Init ───────────────────────────────────────────────────────────────────
+
 
     private static void initIfNeeded() {
         if (horizonProg != 0) return;
 
-        // ---- Pass 1: Event Horizon ----
+
         {
             int vert = compile(GL20.GL_VERTEX_SHADER,   HORIZON_VERT, "BlackHole-Horizon");
             int frag = compile(GL20.GL_FRAGMENT_SHADER, HORIZON_FRAG, "BlackHole-Horizon");
@@ -360,7 +333,7 @@ public class BlackHoleRenderer {
             hMV   = GL20.glGetUniformLocation(horizonProg, "ModelViewMat");
             hProj = GL20.glGetUniformLocation(horizonProg, "ProjMat");
 
-            float[] verts = buildCubeVerts(HORIZON_R * 1.01f); // ligeiramente maior que o SDF
+            float[] verts = buildCubeVerts(HORIZON_R * 1.01f);
             horizonVao = GL30.glGenVertexArrays();
             horizonVbo = GL15.glGenBuffers();
             GL30.glBindVertexArray(horizonVao);
@@ -371,7 +344,7 @@ public class BlackHoleRenderer {
             GL30.glBindVertexArray(0);
         }
 
-        // ---- Pass 2: Lensing Halo ----
+
         {
             int vert = compile(GL20.GL_VERTEX_SHADER,   LENS_VERT, "BlackHole-Lens");
             int frag = compile(GL20.GL_FRAGMENT_SHADER, LENS_FRAG, "BlackHole-Lens");
@@ -392,7 +365,7 @@ public class BlackHoleRenderer {
             GL30.glBindVertexArray(0);
         }
 
-        // ---- Pass 3: Accretion Disk ----
+
         {
             int vert = compile(GL20.GL_VERTEX_SHADER,   DISK_VERT, "BlackHole-Disk");
             int frag = compile(GL20.GL_FRAGMENT_SHADER, DISK_FRAG, "BlackHole-Disk");
@@ -400,7 +373,7 @@ public class BlackHoleRenderer {
 
             GL20.glBindAttribLocation(diskProg, 0, "Position");
             GL20.glBindAttribLocation(diskProg, 1, "UV");
-            GL20.glLinkProgram(diskProg); // re-link para aplicar attrib bindings
+            GL20.glLinkProgram(diskProg);
 
             dMV        = GL20.glGetUniformLocation(diskProg, "ModelViewMat");
             dProj      = GL20.glGetUniformLocation(diskProg, "ProjMat");
@@ -408,7 +381,7 @@ public class BlackHoleRenderer {
             dViewRight = GL20.glGetUniformLocation(diskProg, "uViewRight");
             dViewUp    = GL20.glGetUniformLocation(diskProg, "uViewUp");
 
-            // inner radius = 30% do cubo, outer = 85%
+
             float[] verts = buildDiskVerts(R * 0.30f, R * 0.85f);
             diskVao = GL30.glGenVertexArrays();
             diskVbo = GL15.glGenBuffers();
@@ -450,20 +423,15 @@ public class BlackHoleRenderer {
         return prog;
     }
 
-    // ── Public API ─────────────────────────────────────────────────────────────
 
-    /**
-     * Renderiza o buraco negro completo.
-     *
-     * @param matrices  PoseStack já posicionada/escalada no centro do buraco negro.
-     * @param timeTicks Tempo de jogo (ticks) para animação.
-     */
+
+
     public static void render(PoseStack matrices, float timeTicks) {
         initIfNeeded();
 
-        float time = timeTicks * 0.02f; // normaliza para ~segundos
+        float time = timeTicks * 0.02f;
 
-        // ── Salva estado GL ────────────────────────────────────────────────────
+
         int     prevProg      = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
         int     prevVao       = GL11.glGetInteger(GL30.GL_VERTEX_ARRAY_BINDING);
         int     prevSrc       = GL11.glGetInteger(GL11.GL_BLEND_SRC);
@@ -475,11 +443,11 @@ public class BlackHoleRenderer {
 
         Matrix4f proj = RenderSystem.getProjectionMatrix();
 
-        // ─────────────────────────────────────────────────────────────────────
-        // PASS 1 — EVENT HORIZON (esfera absolutamente negra, depth write ON)
-        // Renderiza antes de tudo: estabelece a máscara de profundidade para
-        // que o lensing halo e o disco fiquem ATRÁS do event horizon.
-        // ─────────────────────────────────────────────────────────────────────
+
+
+
+
+
         {
             Matrix4f mv = new Matrix4f(RenderSystem.getModelViewMatrix()).mul(matrices.last().pose());
 
@@ -500,17 +468,17 @@ public class BlackHoleRenderer {
             GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, CUBE_VERT_COUNT);
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // PASS 2 — LENSING HALO (blending aditivo, depth write OFF)
-        // Renderiza a "coroa" de distorção gravitacional como anel concêntrico.
-        // ─────────────────────────────────────────────────────────────────────
+
+
+
+
         {
             Matrix4f mv = new Matrix4f(RenderSystem.getModelViewMatrix()).mul(matrices.last().pose());
 
             GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);   // aditivo
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
             GL11.glDepthMask(false);
-            GL11.glDisable(GL11.GL_CULL_FACE);                   // ver dos dois lados
+            GL11.glDisable(GL11.GL_CULL_FACE);
 
             GL20.glUseProgram(lensProg);
             try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -524,22 +492,22 @@ public class BlackHoleRenderer {
             GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, CUBE_VERT_COUNT);
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // PASS 3 — ACCRETION DISK
-        // Blending alpha normal, double-sided (sem culling), depth read ON.
-        // O disco é renderizado em sua própria pose (inclinar 15° no world renderer).
-        // ─────────────────────────────────────────────────────────────────────
+
+
+
+
+
         {
             Matrix4f mv = new Matrix4f(RenderSystem.getModelViewMatrix()).mul(matrices.last().pose());
 
             GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);   // aditivo para brilho
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
             GL11.glDepthMask(false);
             GL11.glDisable(GL11.GL_CULL_FACE);
 
-            // View right/up em world space (aproximation via MV matrix inverse)
-            // Para o Doppler: extraímos a coluna X e Y da inversa da rotação da câmera
-            // Como a MV é ortogonal na rotação, transposta = inversa para a rotação
+
+
+
             float viewRX = mv.m00(), viewRY = mv.m10(), viewRZ = mv.m20();
             float viewUX = mv.m01(), viewUY = mv.m11(), viewUZ = mv.m21();
 
@@ -557,7 +525,7 @@ public class BlackHoleRenderer {
             GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, DISK_SEGMENTS * 6);
         }
 
-        // ── Restaura estado GL ─────────────────────────────────────────────────
+
         GL20.glUseProgram(prevProg);
         GL30.glBindVertexArray(prevVao);
         GL11.glDepthMask(prevDepthMask);

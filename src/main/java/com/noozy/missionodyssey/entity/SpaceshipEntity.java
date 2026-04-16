@@ -37,16 +37,15 @@ public class SpaceshipEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<Float> THROTTLE_AMOUNT =
             SynchedEntityData.defineId(SpaceshipEntity.class, EntityDataSerializers.FLOAT);
 
-    // ── Temporal Jump ────────────────────────────────────────────────────────
-    /** After receiving the jump packet the server waits this many ticks before
-     *  firing, so the teleport coincides with the client's white-flash phase. */
-    public  static final int  JUMP_FIRE_DELAY    = 30;   // ticks (~1.5 s)
-    public  static final int  JUMP_COOLDOWN_MAX  = 600;  // 30 s
+
+
+    public  static final int  JUMP_FIRE_DELAY    = 30;
+    public  static final int  JUMP_COOLDOWN_MAX  = 600;
     public  static final double JUMP_DISTANCE    = 10_000.0;
 
-    /** Server-side countdown until the jump fires (0 = no pending jump). */
+
     private int jumpFireTicks = 0;
-    /** Server-side cooldown remaining (0 = ready). */
+
     private int jumpCooldownTicks = 0;
 
     public boolean inputForward;
@@ -107,17 +106,13 @@ public class SpaceshipEntity extends Entity implements GeoEntity {
         builder.define(THROTTLE_AMOUNT, 0.0f);
     }
 
-    // ── Temporal Jump API ────────────────────────────────────────────────────
+
 
     public boolean isJumpReady() {
         return jumpCooldownTicks <= 0 && jumpFireTicks <= 0;
     }
 
-    /**
-     * Called from the network handler when the client requests a jump.
-     * Queues the jump; it fires {@link #JUMP_FIRE_DELAY} ticks later so
-     * the server-side teleport coincides with the client's white-flash phase.
-     */
+
     public void requestTemporalJump() {
         if (!isJumpReady()) return;
         jumpFireTicks = JUMP_FIRE_DELAY;
@@ -141,18 +136,18 @@ public class SpaceshipEntity extends Entity implements GeoEntity {
 
     @Override
     public void tick() {
-        // Captura a rotação ANTES de super.tick() aplicar qualquer correção de lerp do servidor.
+
         float savedYRot = getYRot();
         float savedXRot = getXRot();
 
         super.tick();
 
-        // Restaura os valores pré-tick para que a interpolação de renderização
-        // (yRotO → yRot) use a referência correta e não um valor pós-lerp.
+
+
         yRotO = savedYRot;
         xRotO = savedXRot;
 
-        // ── Temporal jump countdown (server only) ───────────────────────────────
+
         if (!level().isClientSide()) {
             if (jumpCooldownTicks > 0) jumpCooldownTicks--;
 
@@ -167,10 +162,10 @@ public class SpaceshipEntity extends Entity implements GeoEntity {
         Entity passenger = getControllingPassenger();
 
         if (passenger != null) {
-            // No cliente, cancela a correção de lerp do servidor antes de tickFlying().
-            // O lerp captura um ângulo antigo e briga com tickFlying() a cada tick.
-            // Perto da fronteira ±180°, o wrapDegrees inverte a direcção da correção
-            // e a entidade começa a girar sem controle — este restore impede isso.
+
+
+
+
             if (level().isClientSide()) {
                 setYRot(savedYRot);
                 setXRot(savedXRot);
@@ -193,10 +188,7 @@ public class SpaceshipEntity extends Entity implements GeoEntity {
         }
     }
 
-    /**
-     * Teleports the ship (and its passenger) 10 000 blocks in the direction
-     * the controlling player is looking, then starts the cooldown.
-     */
+
     private void performTemporalJump() {
         LivingEntity driver = getControllingPassenger();
         if (!(driver instanceof ServerPlayer serverPlayer)) return;

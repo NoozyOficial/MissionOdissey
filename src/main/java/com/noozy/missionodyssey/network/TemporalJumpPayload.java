@@ -6,10 +6,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-/**
- * Sent by the client when the player presses the temporal jump key.
- * The server validates the request (in ship + cooldown ready) and queues the jump.
- */
+
 public record TemporalJumpPayload() implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<TemporalJumpPayload> TYPE =

@@ -1,0 +1,7 @@
+{
+  "type": "missionodyssey:titanium_smelting",
+  "input": { "item": "minecraft:iron_ore" },
+  "output": { "id": "minecraft:iron_ingot", "count": 1 },
+  "energy_usage": 20,
+  "cooking_time": 200
+}

@@ -15,13 +15,21 @@ public class ModItemGroups {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MissionOdyssey.MODID);
 
-    public static final Supplier<CreativeModeTab> BISMUTH_ITEMS_TAB = CREATIVE_MODE_TAB.register("bismuth_items_tab",
+    public static final Supplier<CreativeModeTab> MISSION_ODYSSEY = CREATIVE_MODE_TAB.register("mission_odyssey_tab",
             () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.SPACESHIP_ITEM.get()))
                     .title(Component.translatable("itemGroup.missionodyssey"))
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModItems.SPACESHIP_ITEM.get());
                         output.accept(ModBlocks.MARS_SAND.get());
                         output.accept(ModBlocks.MARS_STONE.get());
+                        output.accept(ModBlocks.MACHINE_FRAME.get());
+                        output.accept(ModBlocks.TITANIUM_BLAST_FURNACE.get());
+                        output.accept(ModBlocks.TITANIUM_ORE.get());
+                        output.accept(ModBlocks.DEEPSLATE_TITANIUM_ORE.get());
+                        output.accept(ModBlocks.RAW_TITANIUM_BLOCK.get());
+                        output.accept(ModBlocks.TITANIUM_BLOCK.get());
+                        output.accept(ModItems.RAW_TITANIUM.get());
+                        output.accept(ModItems.TITANIUM_INGOT.get());
                     }).build());
 
     public static void register(IEventBus eventBus) {

@@ -6,11 +6,7 @@ import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-/**
- * Objeto singleton que representa Saturno como GeoAnimatable.
- * Não é uma entidade — é renderizado diretamente via WorldRenderEvents.
- * A rotação é aplicada via PoseStack, não via GeckoLib animations.
- */
+
 public class SaturnGeoObject implements GeoAnimatable {
 
     public static final SaturnGeoObject INSTANCE = new SaturnGeoObject();
@@ -21,7 +17,7 @@ public class SaturnGeoObject implements GeoAnimatable {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar registrar) {
-        // Sem controllers — rotação gerenciada via PoseStack no renderer
+
     }
 
     @Override

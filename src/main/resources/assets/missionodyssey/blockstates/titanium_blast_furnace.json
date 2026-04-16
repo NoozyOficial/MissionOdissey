@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,assembled=false": { "model": "missionodyssey:block/titanium_blast_furnace" },
+    "facing=south,assembled=false": { "model": "missionodyssey:block/titanium_blast_furnace", "y": 180 },
+    "facing=west,assembled=false": { "model": "missionodyssey:block/titanium_blast_furnace", "y": 270 },
+    "facing=east,assembled=false": { "model": "missionodyssey:block/titanium_blast_furnace", "y": 90 },
+    "facing=north,assembled=true": { "model": "missionodyssey:block/machine_frame" },
+    "facing=south,assembled=true": { "model": "missionodyssey:block/machine_frame", "y": 180 },
+    "facing=west,assembled=true": { "model": "missionodyssey:block/machine_frame", "y": 270 },
+    "facing=east,assembled=true": { "model": "missionodyssey:block/machine_frame", "y": 90 }
+  }
+}

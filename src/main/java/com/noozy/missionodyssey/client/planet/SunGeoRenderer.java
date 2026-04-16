@@ -28,13 +28,13 @@ public class SunGeoRenderer extends GeoObjectRenderer<SunGeoObject> {
                           boolean isReRender, float partialTick, int packedLight, int packedOverlay,
                           int packedColor) {
         this.objectRenderTranslations = new Matrix4f(poseStack.last().pose());
-        // Centralizar ligeiramente (mesmo offset do Earth)
+
         poseStack.translate(0.0, -1.5, 0.0);
     }
 
     public void renderSun(PoseStack matrices, net.minecraft.client.renderer.MultiBufferSource consumers,
                           float partialTick, int packedLight) {
-        // Renderiza com entityCutout para que a textura seja opaca e ignorar "sky lighting"
+
         render(matrices, SunGeoObject.INSTANCE, consumers,
                RenderType.entityCutout(TEXTURE), null, packedLight, partialTick);
     }

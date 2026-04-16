@@ -13,7 +13,7 @@ public class SunGeoObject implements GeoAnimatable {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // Sem animações
+
     }
 
     @Override

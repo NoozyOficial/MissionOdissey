@@ -230,8 +230,8 @@ public class SpaceSkyboxRenderer {
         GL30.glBindVertexArray(vaoId);
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, CUBE_VERT_COUNT);
 
-        // Restaura o VAO que estava antes — não deixar em 0, pois o MC usa
-        // OpenGL core profile onde draw calls sem VAO ativo geram GL_INVALID_OPERATION.
+
+
         GL30.glBindVertexArray(prevVao);
 
         GL20.glUseProgram(prevProgram);

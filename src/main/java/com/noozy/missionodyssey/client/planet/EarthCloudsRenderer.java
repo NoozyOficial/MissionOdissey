@@ -14,19 +14,19 @@ import java.nio.FloatBuffer;
 
 public class EarthCloudsRenderer {
 
-    // Cubo específico "clouds" do JSON do modelo da terra tem essas proporções exatas:
-    // origin: -25, -1, -25. size: 50, 50, 49
-    // Descontando o translate de Y=-1.5 no modelo (-24 / 16), essas são as extremidades locais do cubo.
-    private static final float minX = -1.5625f;  // -25 / 16.0
+
+
+
+    private static final float minX = -1.5625f;
     private static final float maxX =  1.5625f;
-    private static final float minY = -1.5625f;  // (-1 / 16.0) - 1.5 translation
-    private static final float maxY =  1.5625f;  // (49 / 16.0) - 1.5 translation
-    private static final float minZ = -1.5625f;  // -25 / 16.0
-    private static final float maxZ =  1.5f;     // (-25 + 49) / 16.0 = 24 / 16.0 = 1.5
+    private static final float minY = -1.5625f;
+    private static final float maxY =  1.5625f;
+    private static final float minZ = -1.5625f;
+    private static final float maxZ =  1.5f;
 
     private static final int CUBE_VERT_COUNT = 36;
 
-    // Shader State
+
     private static int shaderProgram = 0;
     private static int vaoId = 0;
     private static int vboId = 0;
@@ -89,7 +89,7 @@ public class EarthCloudsRenderer {
             "    vec3 pixelatedPos = floor(vLocalPos * pixels) / pixels;\n" +
             "    \n" +
             "    // Adiciona tempo para os pixels morpharem/evoluirem e se transladarem\n" +
-            "    vec3 noisePos = pixelatedPos * 2.5 + vec3(uTime * 0.025, uTime * -0.005, uTime * 0.015);\n" + // 2x mais lento
+            "    vec3 noisePos = pixelatedPos * 2.5 + vec3(uTime * 0.025, uTime * -0.005, uTime * 0.015);\n" +
             "    \n" +
             "    float n = fbm(noisePos);\n" +
             "    \n" +
@@ -110,28 +110,28 @@ public class EarthCloudsRenderer {
             "}\n";
 
     private static float[] buildCloudCube() {
-        // Criar as 6 faces usando os min/max
+
         float x1 = minX, x2 = maxX;
         float y1 = minY, y2 = maxY;
         float z1 = minZ, z2 = maxZ;
 
         return new float[]{
-            // Frente
+
             x1, y1, z2,  x2, y1, z2,  x1, y2, z2,
             x2, y1, z2,  x2, y2, z2,  x1, y2, z2,
-            // Trás
+
             x1, y1, z1,  x1, y2, z1,  x2, y1, z1,
             x2, y1, z1,  x1, y2, z1,  x2, y2, z1,
-            // Cima
+
             x1, y2, z1,  x1, y2, z2,  x2, y2, z1,
             x2, y2, z1,  x1, y2, z2,  x2, y2, z2,
-            // Baixo
+
             x1, y1, z1,  x2, y1, z1,  x1, y1, z2,
             x2, y1, z1,  x2, y1, z2,  x1, y1, z2,
-            // Esquerda
+
             x1, y1, z1,  x1, y1, z2,  x1, y2, z1,
             x1, y1, z2,  x1, y2, z2,  x1, y2, z1,
-            // Direita
+
             x2, y1, z1,  x2, y2, z1,  x2, y1, z2,
             x2, y1, z2,  x2, y2, z1,  x2, y2, z2
         };

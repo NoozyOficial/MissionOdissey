@@ -15,11 +15,11 @@ import java.nio.FloatBuffer;
 
 public class EarthAtmosphereRenderer {
 
-    // Raio para a atmosfera (um pouco maior que o modelo)
+
     private static final float ATMO_RADIUS = (float) (ModDimensions.EARTH_MODEL_RADIUS * 1.05);
     private static final int CUBE_VERT_COUNT = 36;
 
-    // Atmosfera GL State
+
     private static int shaderProgram = 0;
     private static int vaoId = 0;
     private static int vboId = 0;
@@ -139,7 +139,7 @@ public class EarthAtmosphereRenderer {
         boolean cullEnabled = GL11.glGetBoolean(GL11.GL_CULL_FACE);
 
         GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE); // Additive blending for atmosphere
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         GL11.glDepthMask(false);
         GL11.glEnable(GL11.GL_CULL_FACE);
         GL11.glCullFace(GL11.GL_BACK);

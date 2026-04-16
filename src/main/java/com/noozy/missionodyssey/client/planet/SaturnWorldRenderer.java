@@ -31,11 +31,7 @@ public class SaturnWorldRenderer {
     private static final SaturnGeoRenderer PLANET_RENDERER = new SaturnGeoRenderer();
     private static LightRenderHandle<DirectionalLightData> sunLightHandle;
 
-    /**
-     * HIGHEST priority: skybox sempre roda antes de qualquer planeta.
-     * Earth/Mars/Saturn usam NORMAL priority, então o skybox nunca
-     * sobrescreve os planetas já desenhados.
-     */
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onRenderSkybox(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
@@ -47,7 +43,7 @@ public class SaturnWorldRenderer {
         SpaceSkyboxRenderer.render(time, event.getCamera());
     }
 
-    /** Planeta Saturno — roda em prioridade NORMAL, depois do skybox. */
+
     @SubscribeEvent
     public static void onRenderSaturn(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
@@ -84,11 +80,11 @@ public class SaturnWorldRenderer {
         double scale = Math.min(fakeRadius / ModDimensions.SATURN_MODEL_RADIUS, (fakeDistance - 0.1) / ModDimensions.SATURN_MODEL_RADIUS);
 
         float rotation = (float) ((time % 8750.0) / 8750.0 * 360.0);
-        // Full bright — o shading direcional vem da atmosfera (shader GL puro)
+
         int packedLight = 0xF000F0;
         int maxLight    = 0xF000F0;
 
-        // Direção do Sol calculada dinamicamente a partir da posição orbital atual
+
         Vector3f sunWorldDir = OrbitalMathHelper.getSunDirection(saturnWorld);
 
         Vector3f sunDirView = new Vector3f(sunWorldDir);
