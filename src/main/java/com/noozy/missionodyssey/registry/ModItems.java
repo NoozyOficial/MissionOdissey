@@ -2,6 +2,7 @@ package com.noozy.missionodyssey.registry;
 
 import com.noozy.missionodyssey.MissionOdyssey;
 import com.noozy.missionodyssey.item.SpaceshipItem;
+import com.noozy.missionodyssey.item.WrenchItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -14,6 +15,9 @@ public class ModItems {
 
     public static final DeferredItem<Item> SPACESHIP_ITEM = ITEMS.register("spaceship",
             () -> new SpaceshipItem(new Item.Properties().stacksTo(1)));
+
+    public static final DeferredItem<Item> WRENCH = ITEMS.register("wrench",
+            () -> new WrenchItem(new Item.Properties().stacksTo(1)));
 
     public static final DeferredItem<Item> RAW_TITANIUM = ITEMS.register("raw_titanium",
             () -> new Item(new Item.Properties()));

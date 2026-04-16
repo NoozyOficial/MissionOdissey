@@ -22,23 +22,13 @@ public class ModCapabilities {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 ModBlockEntities.TITANIUM_BLAST_FURNACE.get(),
-                (be, side) -> {
-                    BlockState state = be.getBlockState();
-                    if (!state.hasProperty(HorizontalDirectionalBlock.FACING)) return null;
-                    Direction facing = state.getValue(HorizontalDirectionalBlock.FACING);
-                    return be.getItemHandler(side, facing);
-                }
+                (be, side) -> be.getItemHandler(side, be.getBlockPos())
         );
 
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK,
                 ModBlockEntities.TITANIUM_BLAST_FURNACE.get(),
-                (be, side) -> {
-                    BlockState state = be.getBlockState();
-                    if (!state.hasProperty(HorizontalDirectionalBlock.FACING)) return null;
-                    Direction facing = state.getValue(HorizontalDirectionalBlock.FACING);
-                    return be.getEnergyHandler(side, facing);
-                }
+                (be, side) -> be.getEnergyHandler(side, be.getBlockPos())
         );
 
 
@@ -49,10 +39,7 @@ public class ModCapabilities {
                     if (be.getControllerPos() == null || be.getLevel() == null) return null;
                     BlockEntity controllerBE = be.getLevel().getBlockEntity(be.getControllerPos());
                     if (!(controllerBE instanceof TitaniumBlastFurnaceBlockEntity controller)) return null;
-                    BlockState controllerState = be.getLevel().getBlockState(be.getControllerPos());
-                    if (!controllerState.hasProperty(HorizontalDirectionalBlock.FACING)) return null;
-                    Direction facing = controllerState.getValue(HorizontalDirectionalBlock.FACING);
-                    return controller.getItemHandler(side, facing);
+                    return controller.getItemHandler(side, be.getBlockPos());
                 }
         );
 
@@ -63,10 +50,7 @@ public class ModCapabilities {
                     if (be.getControllerPos() == null || be.getLevel() == null) return null;
                     BlockEntity controllerBE = be.getLevel().getBlockEntity(be.getControllerPos());
                     if (!(controllerBE instanceof TitaniumBlastFurnaceBlockEntity controller)) return null;
-                    BlockState controllerState = be.getLevel().getBlockState(be.getControllerPos());
-                    if (!controllerState.hasProperty(HorizontalDirectionalBlock.FACING)) return null;
-                    Direction facing = controllerState.getValue(HorizontalDirectionalBlock.FACING);
-                    return controller.getEnergyHandler(side, facing);
+                    return controller.getEnergyHandler(side, be.getBlockPos());
                 }
         );
     }

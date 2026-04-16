@@ -32,13 +32,29 @@ import org.jetbrains.annotations.Nullable;
 
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class TitaniumBlastFurnaceBlockEntity extends BlockEntity implements MenuProvider {
     private static final Logger LOGGER = LogUtils.getLogger();
     public enum State { PRE_ASSEMBLE, ASSEMBLE, IDLE, RUNNING }
+    public enum PortType {
+        ITEM_INPUT,
+        ITEM_OUTPUT,
+        ENERGY_INPUT,
+        NONE;
+
+        public PortType next() {
+            return values()[(ordinal() + 1) % values().length];
+        }
+    }
+
     private State currentState = State.PRE_ASSEMBLE;
     private long stateStartTime = 0;
+    private final Map<BlockPos, Map<Direction, PortType>> ports = new HashMap<>();
 
     private final ItemStackHandler itemHandler = new ItemStackHandler(2) {
         @Override
@@ -204,6 +220,24 @@ public class TitaniumBlastFurnaceBlockEntity extends BlockEntity implements Menu
         return currentState;
     }
 
+    public void togglePort(BlockPos pos, Direction side) {
+        Map<Direction, PortType> blockPorts = ports.computeIfAbsent(pos, k -> new HashMap<>());
+        PortType current = blockPorts.getOrDefault(side, PortType.NONE);
+        blockPorts.put(side, current.next());
+        setChanged();
+        if (level != null) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    public PortType getPortType(BlockPos pos, Direction side) {
+        return ports.getOrDefault(pos, Map.of()).getOrDefault(side, PortType.NONE);
+    }
+
+    public Map<BlockPos, Map<Direction, PortType>> getPorts() {
+        return ports;
+    }
+
     public float getAnimTime(float partialTicks) {
         if (level == null) return 0;
         return (level.getGameTime() - stateStartTime + partialTicks) / 20f;
@@ -217,6 +251,14 @@ public class TitaniumBlastFurnaceBlockEntity extends BlockEntity implements Menu
         tag.putInt("progress", progress);
         tag.put("inventory", itemHandler.serializeNBT(registries));
         tag.putInt("energy", energyStorage.getEnergyStored());
+
+        CompoundTag portsTag = new CompoundTag();
+        ports.forEach((pos, map) -> {
+            CompoundTag posTag = new CompoundTag();
+            map.forEach((dir, type) -> posTag.putString(dir.getName(), type.name()));
+            portsTag.put(String.valueOf(pos.asLong()), posTag);
+        });
+        tag.put("ports", portsTag);
     }
 
     @Override
@@ -229,27 +271,43 @@ public class TitaniumBlastFurnaceBlockEntity extends BlockEntity implements Menu
         progress = tag.getInt("progress");
         itemHandler.deserializeNBT(registries, tag.getCompound("inventory"));
         energyStorage.receiveEnergy(tag.getInt("energy"), false);
+
+        ports.clear();
+        if (tag.contains("ports")) {
+            CompoundTag portsTag = tag.getCompound("ports");
+            for (String key : portsTag.getAllKeys()) {
+                BlockPos pos = BlockPos.of(Long.parseLong(key));
+                CompoundTag posTag = portsTag.getCompound(key);
+                Map<Direction, PortType> map = new HashMap<>();
+                for (String dirKey : posTag.getAllKeys()) {
+                    Direction dir = Direction.byName(dirKey);
+                    if (dir != null) {
+                        map.put(dir, PortType.valueOf(posTag.getString(dirKey)));
+                    }
+                }
+                ports.put(pos, map);
+            }
+        }
     }
 
-    public IItemHandler getItemHandler(@Nullable Direction side, Direction facing) {
+    public IItemHandler getItemHandler(@Nullable Direction side, BlockPos pos) {
         if (side == null) return itemHandler;
-        if (side == getLeft(facing)) {
+        PortType type = getPortType(pos, side);
+        if (type == PortType.ITEM_INPUT) {
             return new net.neoforged.neoforge.items.wrapper.RangedWrapper(itemHandler, 0, 1);
-        }
-        if (side == getRight(facing)) {
+        } else if (type == PortType.ITEM_OUTPUT) {
             return new net.neoforged.neoforge.items.wrapper.RangedWrapper(itemHandler, 1, 2);
         }
         return null;
     }
 
-    public IEnergyStorage getEnergyHandler(@Nullable Direction side, Direction facing) {
+    public IEnergyStorage getEnergyHandler(@Nullable Direction side, BlockPos pos) {
         if (side == null) return energyStorage;
-        Direction left = getLeft(facing);
-        Direction right = getRight(facing);
-        if (side == facing || side == left || side == right) {
-            return null;
+        PortType type = getPortType(pos, side);
+        if (type == PortType.ENERGY_INPUT) {
+            return energyStorage;
         }
-        return energyStorage;
+        return null;
     }
 
     private Direction getLeft(Direction facing) { return facing.getClockWise(); }
@@ -265,5 +323,13 @@ public class TitaniumBlastFurnaceBlockEntity extends BlockEntity implements Menu
     @Override
     public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket() {
         return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void onDataPacket(net.minecraft.network.Connection net, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
+        CompoundTag tag = pkt.getTag();
+        if (tag != null) {
+            loadAdditional(tag, registries);
+        }
     }
 }

@@ -30,6 +30,7 @@ public class ModItemGroups {
                         output.accept(ModBlocks.TITANIUM_BLOCK.get());
                         output.accept(ModItems.RAW_TITANIUM.get());
                         output.accept(ModItems.TITANIUM_INGOT.get());
+                        output.accept(ModItems.WRENCH.get());
                     }).build());
 
     public static void register(IEventBus eventBus) {
